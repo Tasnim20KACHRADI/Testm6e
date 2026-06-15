@@ -1,0 +1,15 @@
+28/05
+# Avancement projet RFID M6e
+
+Hier et aujourd’hui, j’ai travaillé sur la configuration de l’environnement C/C++ pour utiliser la MercuryAPI avec le lecteur RFID ThingMagic M6e.
+J’ai finalement abandonné VS Code pour passer à Visual Studio 2022 afin de résoudre les problèmes de compilation et de linkage.
+
+Actuellement, le programme C fonctionne et permet :
+
+* la détection automatique des ports COM,
+* la détection automatique du baudrate,
+* la connexion automatique au lecteur M6e,
+* l’affichage des informations du lecteur (modèle, firmware, port, baudrate).
+
+Le programme fonctionne via terminal/console avec la MercuryAPI en C.
+La configuration automatique de la région RFID et la lecture des tags seront les prochaines étapes.
