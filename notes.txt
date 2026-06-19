@@ -12,4 +12,41 @@ Actuellement, le programme C fonctionne et permet :
 * l’affichage des informations du lecteur (modèle, firmware, port, baudrate).
 
 Le programme fonctionne via terminal/console avec la MercuryAPI en C.
-La configuration automatique de la région RFID et la lecture des tags seront les prochaines étapes.
+La configuration automatique de la région RFID et la lecture des tags seront les prochaines étapes 
+
+19/06/2026
+Déjà réalisé : 
+
+* Développement logiciel : 
+Développement complet de l'application C de pilotage de l'arche RFID.
+Mise en place d'une architecture modulaire permettant :
+La connexion automatique au lecteur M6E.
+La configuration des fréquences et de la puissance d'émission.
+La détection et la communication avec le STM32.
+Le scan et le filtrage des tags RFID.
+La sélection automatique du tag à mesurer.
+Le contrôle des antennes de l'arche RFID.
+L'acquisition et l'enregistrement des mesures.
+La génération automatique des fichiers CSV.
+
+*Fonctionnalités développées
+Mode test des antennes pour identifier les antennes défectueuses ou faiblement performantes.
+Mode mesure complète permettant le balayage automatique de l'ensemble de l'arche RFID.
+Balayage sur plusieurs fréquences RFID.
+Recherche de la puissance minimale de détection pour chaque antenne.
+Acquisition des mesures pour différentes positions du tag.
+Génération automatique des fichiers CSV contenant les résultats expérimentaux.
+Mode sweep fréquence × puissance sur une antenne spécifique pour l'analyse détaillée du comportement du système.
+
+*3 Diagramme fonctionnel ,Diagramme d'architecture matérielle , flowchart. 
+Scripts Python pour la génération de heatmaps à partir des fichiers CSV.
+Génération de heatmaps à partir des mesures réalisées sur 5 fréquences.
+Mesures M6E sur la clé 12 seule.
+Mesures M6E sur la clé 13 seule.
+Vérification de la puissance émise par le M6E avec Voyantic et analyseur de spectre.
+Comparaison des puissances mesurées entre le M6E et Voyantic.
+Mesures avec Voyantic et l'arche RFID pour évaluer les pertes entre les deux systèmes.
+Mesures avec l'arche RFID (8 antennes) sur les clés 12 et 13.
+Génération de cartographies spatiales similaires aux heatmaps avec l'arche RFID.
+Étude de l'influence de la proximité entre deux clés RFID.
+Mesures avec différentes distances entre les deux clés afin d'analyser les interactions entre tags.
