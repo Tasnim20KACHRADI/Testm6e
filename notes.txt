@@ -50,3 +50,12 @@ Mesures avec l'arche RFID (8 antennes) sur les clés 12 et 13.
 Génération de cartographies spatiales similaires aux heatmaps avec l'arche RFID.
 Étude de l'influence de la proximité entre deux clés RFID.
 Mesures avec différentes distances entre les deux clés afin d'analyser les interactions entre tags.
+
+02/07/2026
+Dans un premier temps, une vérification des puissances délivrées par les systèmes de mesure Voyantic et ThingMagic M6E a été réalisée à l'aide d'un analyseur de spectre, afin de valider les niveaux de puissance réellement transmis.
+
+Ensuite, différentes campagnes de mesures ont été effectuées avec le lecteur Voyantic Pro ainsi qu'avec l'arche RFID, dans le but d'évaluer les pertes introduites par l'architecture (câbles, commutateurs RF, connecteurs, etc.) et d'analyser leur impact sur les performances du système.
+Carte PCB :
+Afin de réduire les pertes liées aux trajets d'émission et de réception du système RFID, le projet a évolué vers la conception d'une carte RF intégrant deux diviseurs de puissance Wilkinson, un amplificateur de puissance (PA) pour le trajet aller (lecteur → tag) et un amplificateur faible bruit (LNA) pour le trajet retour (tag → lecteur). Cette architecture a pour objectif d'améliorer le bilan de liaison en compensant les pertes d'insertion et en augmentant la sensibilité de réception.
+
+Dans cette étape, j'ai conçu et optimisé sous CST Studio Suite un diviseur de puissance Wilkinson en technologie microstrip, adapté à la fréquence 867 MHz et à une impédance caractéristique de 50 Ω, en vue de son intégration dans cette carte RF.
