@@ -12,7 +12,9 @@ int m6e_measure_heatmap(TMR_Reader* r,
     const char* target_epc)
 {
     float angle;
-    int   fi, ai, step_idx, step_total;
+    int   fi, ai, ant_idx, step_idx, step_total;
+    int   ant_num;
+    AntennaAxe axe;
     char  csv_filename[256];
 
     if (!stm32 || stm32->handle == INVALID_HANDLE_VALUE)
@@ -30,7 +32,8 @@ int m6e_measure_heatmap(TMR_Reader* r,
         HEATMAP_ANGLE_START_DEG, HEATMAP_ANGLE_STOP_DEG,
         HEATMAP_ANGLE_STEP_DEG, step_total);
     printf("  Frequences : %d\n", freq_count);
-    printf("  Antennes   : %d (Theta)\n\n", ANT_THETA_COUNT);
+    printf("  Antennes   : %d Theta + %d Phi = %d total\n\n",
+        ANT_THETA_COUNT, ANT_PHI_COUNT, ANT_TOTAL);
 
     /* Nom CSV avec timestamp */
     {
@@ -48,6 +51,7 @@ int m6e_measure_heatmap(TMR_Reader* r,
     motor_home(stm32);
     Sleep(300);
 
+    /* ===== BOUCLE PRINCIPALE : Angle → Frequence → Antenne ===== */
     step_idx = 0;
     for (angle = HEATMAP_ANGLE_START_DEG;
         angle <= HEATMAP_ANGLE_STOP_DEG + 0.01f;
@@ -55,27 +59,44 @@ int m6e_measure_heatmap(TMR_Reader* r,
     {
         step_idx++;
         printf("\n===================================\n");
-        printf("  POSITION [%d/%d] : %.0f deg\n", step_idx, step_total, angle);
+        printf("  ANGLE [%d/%d] : %.0f deg\n", step_idx, step_total, angle);
         printf("===================================\n");
 
+        /* Moteur tourne a cet angle */
         if (!motor_move_to(stm32, angle))
         {
-            printf("  [!] Deplacement moteur echoue — position ignoree\n");
+            printf("  [!] Deplacement moteur echoue — angle ignore\n");
             continue;
         }
-        Sleep(200); /* stabilisation mecanique avant mesure */
+        Sleep(300); /* stabilisation mecanique */
 
+        /* Boucle frequences */
         for (fi = 0; fi < freq_count; fi++)
         {
             uint32_t freq = freq_table[fi];
+            printf("  --- Freq %u kHz ---\n", freq);
 
-            printf("  --- %u kHz ---\n", freq);
+            /* ===== MESURE THETA ===== */
+            printf("  [Theta : %d antennes]\n", ANT_THETA_COUNT);
             for (ai = 0; ai < ANT_THETA_COUNT; ai++)
             {
-                printf("  [%d/%d] ", ai + 1, ANT_THETA_COUNT);
+                ant_num = ANTENNA_THETA[ai];
+                printf("    [%d/%d] ant %d ", ai + 1, ANT_THETA_COUNT, ant_num);
                 fflush(stdout);
                 m6e_measure_antenna(r, stm32,
-                    ANTENNA_THETA[ai], AXE_THETA,
+                    ant_num, AXE_THETA,
+                    freq, target_epc, angle);
+            }
+
+            /* ===== MESURE PHI ===== */
+            printf("  [Phi : %d antennes]\n", ANT_PHI_COUNT);
+            for (ai = 0; ai < ANT_PHI_COUNT; ai++)
+            {
+                ant_num = ANTENNA_PHI[ai];
+                printf("    [%d/%d] ant %d ", ai + 1, ANT_PHI_COUNT, ant_num);
+                fflush(stdout);
+                m6e_measure_antenna(r, stm32,
+                    ant_num, AXE_PHI,
                     freq, target_epc, angle);
             }
         }
