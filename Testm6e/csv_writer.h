@@ -20,6 +20,7 @@ typedef struct {
     char     status[16];    /* "OK" ou "DEAD_ZONE" */
     char     timestamp[32];
     char     epc[64];
+    float    angle_deg;     /* angle moteur de l'arche — 0.0 si non applicable */
 } CsvRow;
 
 int  csv_open(const char* filename);

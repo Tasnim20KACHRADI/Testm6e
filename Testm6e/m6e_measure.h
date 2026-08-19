@@ -32,4 +32,15 @@ int m6e_measure_all(TMR_Reader*  r,
                     int          freq_count,
                     const char*  target_epc);
 
+/* Mesure un point (antenne x frequence) et ecrit la ligne CSV
+ * associee — angle_deg est le tag angle moteur de l'arche pour
+ * cette ligne (0.0 si non applicable). Reutilise par m6e_heatmap. */
+void m6e_measure_antenna(TMR_Reader*  r,
+                    STM32Info*   stm32,
+                    int          antenna_num,
+                    AntennaAxe   axe,
+                    uint32_t     freq_khz,
+                    const char*  target_epc,
+                    float        angle_deg);
+
 #endif /* M6E_MEASURE_H */

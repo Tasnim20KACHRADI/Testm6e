@@ -5,17 +5,20 @@
 #include "m6e_connect.h"
 #include "m6e_config.h"
 #include "stm32.h"
+#include "motor.h"
 #include "m6e_scan.h"
 #include "m6e_select.h"
 #include "m6e_test_antenna.h"
 #include "m6e_measure.h"
 #include "m6e_sweep.h"
+#include "m6e_heatmap.h"
 
    /*
     * MODE D'EXECUTION :
     * 0 = Test antennes      (identifier antennes defectueuses)
     * 1 = Mesure complete    (balayage freq x puissance 72 antennes)
     * 3 = Sweep freq x puissance sur une antenne choisie (type S21)
+    * 4 = Heatmap            (rotation moteur x freq x antennes)
     */
 #define RUN_MODE  1
 
@@ -48,6 +51,7 @@ int main(void)
     case 0: printf("   MODE : TEST ANTENNES             \n"); break;
     case 1: printf("   MODE : MESURE COMPLETE           \n"); break;
     case 3: printf("   MODE : SWEEP FREQ x PUISSANCE    \n"); break;
+    case 4: printf("   MODE : HEATMAP (ROTATION ARCHE)  \n"); break;
     default: printf("   MODE : INCONNU                  \n"); break;
     }
     printf("===================================\n");
@@ -102,6 +106,15 @@ int main(void)
         /* Sweep freq x puissance sur antenne choisie au clavier
          * Genere 1 fichier CSV : sweep_antNNN_*.csv */
         m6e_sweep(&reader, &stm32, target_epc);
+        break;
+
+    case 4:
+        /* Mesure complete avec rotation moteur de l'arche
+         * Genere 1 fichier CSV : heatmap_*.csv (colonne Angle_deg)
+         * -> a tracer avec python/heatmap.py */
+        m6e_measure_heatmap(&reader, &stm32,
+            freq_table, freq_count,
+            target_epc);
         break;
     }
 

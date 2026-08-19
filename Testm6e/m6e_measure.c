@@ -203,12 +203,13 @@ static int m6e_test_dead_zone(TMR_Reader* r, const char* epc)
    m6e_measure_antenna
    Mesure complete pour une antenne et une frequence
    ================================================================ */
-static void m6e_measure_antenna(TMR_Reader* r,
+void m6e_measure_antenna(TMR_Reader* r,
     STM32Info* stm32,
     int          antenna_num,
     AntennaAxe   axe,
     uint32_t     freq_khz,
-    const char* target_epc)
+    const char* target_epc,
+    float        angle_deg)
 {
     int16_t rssi = 0;
     int32_t p_min = -1;
@@ -247,6 +248,7 @@ static void m6e_measure_antenna(TMR_Reader* r,
         row.antenna_num = antenna_num;
         row.p_min_dbm = -1.0f;
         row.rssi_dbm = -999.0f;
+        row.angle_deg = angle_deg;
         strncpy(row.axe, axe_to_str(axe), sizeof(row.axe) - 1);
         strncpy(row.status, "DEAD_ZONE", sizeof(row.status) - 1);
         strncpy(row.epc, target_epc, sizeof(row.epc) - 1);
@@ -266,6 +268,7 @@ static void m6e_measure_antenna(TMR_Reader* r,
     row.antenna_num = antenna_num;
     row.p_min_dbm = p_min / 100.0f;
     row.rssi_dbm = (float)rssi;
+    row.angle_deg = angle_deg;
     strncpy(row.axe, axe_to_str(axe), sizeof(row.axe) - 1);
     strncpy(row.status, "OK", sizeof(row.status) - 1);
     strncpy(row.epc, target_epc, sizeof(row.epc) - 1);
@@ -331,7 +334,7 @@ int m6e_measure_all(TMR_Reader* r,
             fflush(stdout);
             m6e_measure_antenna(r, stm32,
                 ANTENNA_THETA[ai], AXE_THETA,
-                freq, target_epc);
+                freq, target_epc, 0.0f);
         }
 
         /* Balayage Phi */

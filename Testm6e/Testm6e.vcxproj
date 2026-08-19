@@ -23,12 +23,14 @@
     <ClCompile Include="csv_writer.c" />
     <ClCompile Include="m6e_config.c" />
     <ClCompile Include="m6e_connect.c" />
+    <ClCompile Include="m6e_heatmap.c" />
     <ClCompile Include="m6e_measure.c" />
     <ClCompile Include="m6e_scan.c" />
     <ClCompile Include="m6e_select.c" />
     <ClCompile Include="m6e_sweep.c" />
     <ClCompile Include="m6e_test_antenna.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="motor.c" />
     <ClCompile Include="stm32.c" />
   </ItemGroup>
   <ItemGroup>
@@ -37,11 +39,13 @@
     <ClInclude Include="common.h" />
     <ClInclude Include="csv_writer.h" />
     <ClInclude Include="m6e_connect.h" />
+    <ClInclude Include="m6e_heatmap.h" />
     <ClInclude Include="m6e_measure.h" />
     <ClInclude Include="m6e_scan.h" />
     <ClInclude Include="m6e_select.h" />
     <ClInclude Include="m6e_sweep.h" />
     <ClInclude Include="m6e_test_antenna.h" />
+    <ClInclude Include="motor.h" />
     <ClInclude Include="Release\antenna_map.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

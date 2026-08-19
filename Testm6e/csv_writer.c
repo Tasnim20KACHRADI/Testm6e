@@ -21,7 +21,7 @@ int csv_open(const char* filename)
     /* En-tête CSV */
     fprintf(csv_file,
             "Freq_kHz,Antenne,Axe,P_min_dBm,"
-            "RSSI_dBm,Status,EPC,Timestamp\n");
+            "RSSI_dBm,Status,EPC,Timestamp,Angle_deg\n");
 
     printf("  CSV ouvert : %s\n", filename);
     return 1;
@@ -36,7 +36,7 @@ void csv_write_row(const CsvRow* row)
 
     if (strcmp(row->status, "DEAD_ZONE") == 0)
     {
-        fprintf(csv_file, "%u,%d,%s,%.1f,%.1f,%s,%s,%s\n",
+        fprintf(csv_file, "%u,%d,%s,%.1f,%.1f,%s,%s,%s,%.1f\n",
                 row->freq_khz,
                 row->antenna_num,
                 row->axe,
@@ -44,11 +44,12 @@ void csv_write_row(const CsvRow* row)
                 -999.0f,
                 "DEAD_ZONE",
                 row->epc,
-                row->timestamp);
+                row->timestamp,
+                row->angle_deg);
     }
     else
     {
-        fprintf(csv_file, "%u,%d,%s,%.1f,%.1f,%s,%s,%s\n",
+        fprintf(csv_file, "%u,%d,%s,%.1f,%.1f,%s,%s,%s,%.1f\n",
                 row->freq_khz,
                 row->antenna_num,
                 row->axe,
@@ -56,7 +57,8 @@ void csv_write_row(const CsvRow* row)
                 row->rssi_dbm,
                 "OK",
                 row->epc,
-                row->timestamp);
+                row->timestamp,
+                row->angle_deg);
     }
 
     /* Forcer l'écriture immédiate — pas de perte si crash */
