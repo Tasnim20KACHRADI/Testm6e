@@ -1,0 +1,173 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║        SCHÉMA DE CONNEXION: 17HS4401 + A4988 + Arduino                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────┐
+│     ARDUINO      │
+│   UNO / MEGA     │
+├──────────────────┤
+│                  │
+│  Pin 8 (DIR)  ├─────────┬──────────────────────┐
+│  Pin 9 (STEP)├──────────┼──────────────────────┤
+│  GND         ├──────────┤                      │
+│  +5V (opt)   │          │                      │
+│              │          │                      │
+└──────────────┘          │                      │
+                          │                      │
+                    ┌─────▼──────────────┐      │
+                    │                    │      │
+                    │     A4988          │      │
+                    │    STEPPER         │      │
+                    │    DRIVER          │      │
+                    │                    │      │
+                    ├────────────────────┤      │
+                    │                    │      │
+                    │ DIR  ◄─────────────┘      │
+                    │ STEP ◄────────────────────┘
+                    │ GND  ◄─────────┐
+                    │ +5V  ◄─────────┼──────────────┐
+                    │ RST  ◄─────────┘              │
+                    │ SLP  ◄─────────────────────────┤
+                    │                                │
+                    │ MS1  ┐                         │
+                    │ MS2  ├──► GND (Full-step)     │
+                    │ MS3  ┘                         │
+                    │                                │
+                    │ VMOT ◄────────────────────────┬┤
+                    │ GND  ◄────────────────────────┤├── +12V Power Supply
+                    │ OUT1 ┐                        ┌┤ (2A minimum)
+                    │ OUT2 ├──► MOTOR              │
+                    │ OUT3 │   (17HS4401)          │
+                    │ OUT4 ┘   (4 fils)            │
+                    │                              │
+                    └──────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                      DÉTAIL DES CONNEXIONS                                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. ARDUINO ➔ A4988 LOGIQUE                                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Arduino Pin 8  ──┐                                                          │
+│                   ├──► A4988 DIR (Direction du moteur)                       │
+│                   │    • HIGH  = Rotation horaire (CW)                       │
+│                   │    • LOW   = Rotation antihoraire (CCW)                  │
+│                                                                              │
+│  Arduino Pin 9  ──┐                                                          │
+│                   ├──► A4988 STEP (Pulse de pas)                             │
+│                   │    • 1 pulse = 1 pas (200 pas/tour)                      │
+│                   │    • Frequency = RPM * 200 / 60                          │
+│                                                                              │
+│  Arduino GND    ──┬──► A4988 GND (Masse commune - TRÈS IMPORTANT!)          │
+│  A4988 GND      ──┘                                                          │
+│                                                                              │
+│  +5V Power      ──┬──► A4988 RESET (Actif HIGH)                             │
+│  +5V Power      ──┼──► A4988 SLEEP (Actif HIGH)                             │
+│  +5V Power      ──┘──► A4988 +5V (logique)                                  │
+│                                                                              │
+│  GND            ──┬──► A4988 MS1 (GND = Full-step, 200 pas)                 │
+│  GND            ├──► A4988 MS2 (voir tableau microstepping)                  │
+│  GND            ──┘──► A4988 MS3                                             │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 2. MOTEUR 17HS4401 ➔ A4988                                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Moteur NOIR  (Phase A +)  ──► A4988 OUT1                                   │
+│  Moteur VERT  (Phase A -)  ──► A4988 OUT2                                   │
+│  Moteur ROUGE (Phase B +)  ──► A4988 OUT3                                   │
+│  Moteur BLEU  (Phase B -)  ──► A4988 OUT4                                   │
+│                                                                              │
+│  ⚠️ IMPORTANT:                                                               │
+│  • Orange (Midpoint A) ──► LAISSER NON CONNECTÉ                             │
+│  • Jaune  (Midpoint B) ──► LAISSER NON CONNECTÉ                             │
+│  (Ces fils sont pour le mode unipolaire, non utilisé ici)                   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 3. ALIMENTATION MOTEUR (CRITIQUE!)                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  +12V Power Supply (2-3A minimum)                                           │
+│      │                                                                      │
+│      ├──────► A4988 VMOT (Alimentation moteur)                             │
+│      │                                                                      │
+│      ├──────► A4988 GND  (Retour)                                          │
+│      │                                                                      │
+│      └──────► Arduino GND (Masse commune avec Arduino)                     │
+│                                                                              │
+│  ⚠️ JAMAIS d'alimentation du moteur depuis l'Arduino!                       │
+│  Le courant du moteur (~1.3A) détruirait les pins Arduino                  │
+│                                                                              │
+│  Courant nécessaire:                                                         │
+│  • Arduino: ~100-200mA                                                      │
+│  • A4988 Logique: ~50mA                                                     │
+│  • Moteur (X2 phases): ~1.3A × 2 = 2.6A (pic)                              │
+│  TOTAL: Min 2A, recommandé 3A                                               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 4. TABLEAU MICROSTEPPING (MS1, MS2, MS3)                                    │
+├──────────────────┬──────────────────┬──────────────────┬────────┬──────────┤
+│ MS1 (Pin 17)     │ MS2 (Pin 16)     │ MS3 (Pin 15)     │ Pas/tr │ Couple   │
+├──────────────────┼──────────────────┼──────────────────┼────────┼──────────┤
+│ LOW (GND)        │ LOW (GND)        │ LOW (GND)        │  200   │ Maximum  │
+│ HIGH (+5V)       │ LOW (GND)        │ LOW (GND)        │  400   │          │
+│ LOW (GND)        │ HIGH (+5V)       │ LOW (GND)        │  800   │          │
+│ HIGH (+5V)       │ HIGH (+5V)       │ LOW (GND)        │ 1600   │          │
+│ HIGH (+5V)       │ HIGH (+5V)       │ HIGH (+5V)       │ 3200   │ Minimum  │
+├──────────────────┴──────────────────┴──────────────────┴────────┴──────────┤
+│ Recommandation: Garder tout GND (Full-step) pour un couple maximum          │
+│ Le microstepping réduit le couple mais améliore la précision                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    CHECKLIST DE CONNEXION                                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Avant de brancher l'alimentation:
+
+ □ Dir (Pin 8 Arduino)    ──► A4988 DIR
+ □ Step (Pin 9 Arduino)   ──► A4988 STEP
+ □ GND Arduino            ──► A4988 GND (MASSE COMMUNE!)
+
+ □ +5V                    ──► A4988 +5V, RESET, SLEEP
+ □ MS1, MS2, MS3          ──► GND (Full-step)
+
+ □ Moteur Noir (A+)       ──► OUT1
+ □ Moteur Vert (A-)       ──► OUT2
+ □ Moteur Rouge (B+)      ──► OUT3
+ □ Moteur Bleu (B-)       ──► OUT4
+ □ Moteur Orange/Jaune    ──► NON UTILISÉS
+
+ □ +12V PSU               ──► A4988 VMOT
+ □ GND PSU                ──► A4988 GND + Arduino GND (ensemble)
+
+ □ Code uploadé sur Arduino
+ □ Port série configuré (9600 baud)
+ □ Moteur peut tourner librement
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    DÉMARRAGE SÉCURISÉ                                       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+1. ✓ Uploads le code sur Arduino
+2. ✓ Brancher l'alimentation 12V (sans alimenter l'Arduino d'abord)
+3. ✓ Brancher l'Arduino via USB à l'ordinateur
+4. ✓ Ouvrir le Serial Monitor (9600 baud)
+5. ✓ Taper '1' pour un test simple
+6. ✓ Moteur devrait tourner lentement (5 tours @ 60 RPM)
+
+Si rien ne se passe:
+  • Vérifier les fils (surtout le GND!)
+  • Vérifier l'alimentation 12V sur l'A4988 avec un multimètre
+  • Voir la section Troubleshooting du guide
