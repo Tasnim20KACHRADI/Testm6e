@@ -119,7 +119,6 @@ int m6e_scan_tags(TMR_Reader* r,
     printf("\n Position antenne %d (%d lectures)\n",
         ANTENNA_1, READS_PER_ANTENNA);
     print_sep();
-
     if (stm32->handle != INVALID_HANDLE_VALUE)
     {
         printf("  Switch STM32 -> position %d ... ", ANTENNA_1);
@@ -143,7 +142,6 @@ int m6e_scan_tags(TMR_Reader* r,
             ? "OK" : "[!] pas de reponse");
         Sleep(500);
     }
-
     m6e_read_tags_antenna(r, tags, tag_count, 0);
     printf("  Tags valides : %d\n", *tag_count);
 

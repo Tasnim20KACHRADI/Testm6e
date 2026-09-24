@@ -32,17 +32,17 @@
     <ClCompile Include="stm32.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Code_C\m6e_config.h" />
-    <ClInclude Include="..\..\..\Code_C\stm32.h" />
+    <ClInclude Include="antenna_map.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="csv_writer.h" />
+    <ClInclude Include="m6e_config.h" />
     <ClInclude Include="m6e_connect.h" />
     <ClInclude Include="m6e_measure.h" />
     <ClInclude Include="m6e_scan.h" />
     <ClInclude Include="m6e_select.h" />
     <ClInclude Include="m6e_sweep.h" />
     <ClInclude Include="m6e_test_antenna.h" />
-    <ClInclude Include="Release\antenna_map.h" />
+    <ClInclude Include="stm32.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

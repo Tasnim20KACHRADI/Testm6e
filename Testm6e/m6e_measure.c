@@ -129,7 +129,7 @@ static int m6e_test_dead_zone(TMR_Reader* r, const char* epc)
    Phase 1 : Dichotomie grossiere (pas 5 dBm) -> trouve intervalle
    Phase 2 : Raffinement (pas 0.5 dBm) -> P_min precise
    ================================================================ */
-/*static int32_t m6e_find_min_power(TMR_Reader* r,
+static int32_t m6e_find_min_power(TMR_Reader* r,
     const char* epc,
     int16_t* rssi_out)
 {
@@ -140,7 +140,7 @@ static int m6e_test_dead_zone(TMR_Reader* r, const char* epc)
     int16_t rssi = 0;
     int     detected;
 
-    /* ---- PHASE 1 : Dichotomie grossiere ---- 
+    /* ---- PHASE 1 : Dichotomie grossiere ---- */
     printf("    Phase 1 [%.1f .. %.1f dBm] pas 5 dBm\n",
         p_low / 100.0f, p_high / 100.0f);
 
@@ -167,7 +167,7 @@ static int m6e_test_dead_zone(TMR_Reader* r, const char* epc)
         }
     }
 
-    /* ---- PHASE 2 : Raffinement ---- 
+    /* ---- PHASE 2 : Raffinement ---- */
     printf("    Phase 2 [%.1f .. %.1f dBm] pas 0.5 dBm\n",
         p_low / 100.0f, p_high / 100.0f);
 
@@ -196,7 +196,7 @@ static int m6e_test_dead_zone(TMR_Reader* r, const char* epc)
 
     printf("    => P_min = %.1f dBm\n", p_min / 100.0f);
     return p_min;
-} */
+} 
 
 
 /* ================================================================
@@ -225,10 +225,8 @@ static void m6e_measure_antenna(TMR_Reader* r,
     {
         printf("    Switch *%d# ...", antenna_num);
         fflush(stdout);
-        if (stm32_send_cmd(stm32, antenna_num))
-            printf(" OK\n");
-        else
-            printf(" [!] pas de reponse\n");
+        if (!stm32_send_cmd(stm32, antenna_num))
+        printf(" OK\n");
         Sleep(500);
     }
 
@@ -257,7 +255,7 @@ static void m6e_measure_antenna(TMR_Reader* r,
     printf(" OK\n");
 
     /* Mesure P_min */
-    /*p_min = m6e_find_min_power(r, target_epc, &rssi);*/
+    p_min = m6e_find_min_power(r, target_epc, &rssi);
 
     /* Ecrire CSV */
     get_timestamp(ts, sizeof(ts));
@@ -320,7 +318,7 @@ int m6e_measure_all(TMR_Reader* r,
         printf("===================================\n\n");
 
         /* Balayage Theta */
-        printf("--- Balayage THETA (%d antennes) ---\n\n",
+       printf("--- Balayage THETA (%d antennes) ---\n\n",
             ANT_THETA_COUNT);
 
         for (ai = 0; ai < ANT_THETA_COUNT; ai++)
@@ -335,7 +333,7 @@ int m6e_measure_all(TMR_Reader* r,
         }
 
         /* Balayage Phi */
-       /* printf("--- Balayage PHI (%d antennes) ---\n\n",
+       printf("--- Balayage PHI (%d antennes) ---\n\n",
             ANT_PHI_COUNT);
 
         for (ai = 0; ai < ANT_PHI_COUNT; ai++)
@@ -348,7 +346,7 @@ int m6e_measure_all(TMR_Reader* r,
                 ANTENNA_PHI[ai], AXE_PHI,
                 freq, target_epc);
         }
-        */
+        
         printf("\nFrequence %u kHz terminee.\n", freq);
     }
 

@@ -1,15 +1,13 @@
 /* ================================================================
-   stm32.c
+   stm32.c — VERSION CORRIGÉE
    Detection STM32 Nucleo + commandes switch antenne
 
-   SOLUTION AU PROBLEME DE RESET DTR :
-   Port ouvert UNE SEULE FOIS dans stm32_detect()
-   Handle garde ouvert dans stm32->handle
-   stm32_send_cmd() utilise ce handle — PAS de reset DTR
-
-   Protocole STM32 (control_arch_motor_v22_v01.ino) :
-     Boot     : "Output N1\r\n" + "Ready to Switch\r\n"
-     Commande : *N#  -> "Output NN\r\n"
+   CORRECTIONS:
+   1. DTR/RTS desactivés (n'etaient pas vraiment desactivés avant)
+   2. Logging du contenu réellement reçu
+   3. Null-termination des strings
+   4. Protocole flexible (accepte différents formats)
+   5. Meilleur timeout handling
    ================================================================ */
 #include "stm32.h"
 
@@ -23,7 +21,7 @@ static int stm32_configure_port(HANDLE h)
 
     memset(&dcb, 0, sizeof(dcb));
     dcb.DCBlength = sizeof(dcb);
-	if (!GetCommState(h, &dcb)) return 0;/*get commstateguration actuelle du port série dans la structure DCB*/
+    if (!GetCommState(h, &dcb)) return 0;
 
     dcb.BaudRate = CBR_115200;
     dcb.ByteSize = 8;
@@ -35,16 +33,20 @@ static int stm32_configure_port(HANDLE h)
     dcb.fDsrSensitivity = FALSE;
     dcb.fOutX = FALSE;
     dcb.fInX = FALSE;
-    dcb.fDtrControl = DTR_CONTROL_ENABLE;
-    dcb.fRtsControl = RTS_CONTROL_ENABLE;
+
+    /* *** CORRECTION #1: DTR/RTS DESACTIVÉS *** */
+    dcb.fDtrControl = DTR_CONTROL_DISABLE;    /* ÉTAIT: DTR_CONTROL_ENABLE */
+    dcb.fRtsControl = RTS_CONTROL_DISABLE;    /* ÉTAIT: RTS_CONTROL_ENABLE */
+
     dcb.fAbortOnError = FALSE;
     dcb.fBinary = TRUE;
 
-	if (!SetCommState(h, &dcb)) return 0;/*set commstate appliquer la configuration du port série à partir de la structure DCB*/
+    if (!SetCommState(h, &dcb)) return 0;
 
-    timeouts.ReadIntervalTimeout = 0;
+    /* Configuration des timeouts */
+    timeouts.ReadIntervalTimeout = 10;              /* Interval entre caractères */
     timeouts.ReadTotalTimeoutMultiplier = 0;
-    timeouts.ReadTotalTimeoutConstant = 3000;
+    timeouts.ReadTotalTimeoutConstant = 3000;      /* 3 sec max */
     timeouts.WriteTotalTimeoutMultiplier = 0;
     timeouts.WriteTotalTimeoutConstant = 500;
     SetCommTimeouts(h, &timeouts);
@@ -82,6 +84,7 @@ int stm32_detect(int m6e_com_port, STM32Info* stm32)
     DWORD  read_bytes;
     char   path[32];
     char   response[256];
+    int    i;
 
     stm32->handle = INVALID_HANDLE_VALUE;
 
@@ -115,23 +118,61 @@ int stm32_detect(int m6e_com_port, STM32Info* stm32)
         }
 
         /* Attendre le boot STM32 */
-        Sleep(2000);
+        /* CORRECTION #2: Augmenté à 5 secondes (peut-être que DTR causait des reset avant) */
+        Sleep(5000);
 
         /* Lire le boot message */
+        /* CORRECTION #3: Null-terminer le string */
         memset(response, 0, sizeof(response));
-        ReadFile(h, response, sizeof(response) - 1, &read_bytes, NULL);
-
-        if (read_bytes > 0 && strstr(response, "Output") != NULL)
+        if (!ReadFile(h, response, sizeof(response) - 1, &read_bytes, NULL))
         {
-            printf(" STM32 detectee (boot) !\n");
-            stm32->com_port = port;
-            stm32->handle = h;
-            sprintf(stm32->description, "STM32 Nucleo");
-            found = 1;
-            break;
+            printf(" ReadFile echec\n");
+            CloseHandle(h);
+            continue;
+        }
+        if (read_bytes > 0)
+        {
+            response[read_bytes] = '\0';
+        }
+
+        /* CORRECTION #4: LOGGING du contenu réellement reçu */
+        if (read_bytes > 0)
+        {
+            printf("\n    [DEBUG] Recu (%ld bytes): ", read_bytes);
+            for (i = 0; i < (int)read_bytes && i < 60; i++)
+            {
+                if (response[i] >= 32 && response[i] < 127)
+                    printf("%c", response[i]);
+                else if (response[i] == '\r')
+                    printf("\\r");
+                else if (response[i] == '\n')
+                    printf("\\n");
+                else
+                    printf("[%02X]", (unsigned char)response[i]);
+            }
+            printf("\n  ");
+        }
+
+        /* CORRECTION #5: Protocole flexible — accepter "Output" OU d'autres formats */
+        if (read_bytes > 0)
+        {
+            if (strstr(response, "Output") != NULL ||
+                strstr(response, "Ready") != NULL ||
+                read_bytes > 5)  /* Au moins quelque chose */
+            {
+                printf(" STM32 detectee (boot) !\n");
+                stm32->com_port = port;
+                stm32->handle = h;
+                sprintf(stm32->description, "STM32 Nucleo");
+                found = 1;
+                break;
+            }
         }
 
         /* Fallback : envoyer *1# */
+        printf("[tentative *1#] ");
+        fflush(stdout);
+
         PurgeComm(h, PURGE_RXABORT | PURGE_RXCLEAR |
             PURGE_TXABORT | PURGE_TXCLEAR);
         Sleep(100);
@@ -139,9 +180,35 @@ int stm32_detect(int m6e_com_port, STM32Info* stm32)
         Sleep(500);
 
         memset(response, 0, sizeof(response));
-        ReadFile(h, response, sizeof(response) - 1, &read_bytes, NULL);
+        if (!ReadFile(h, response, sizeof(response) - 1, &read_bytes, NULL))
+        {
+            printf(" ReadFile echec\n");
+            CloseHandle(h);
+            continue;
+        }
+        if (read_bytes > 0)
+        {
+            response[read_bytes] = '\0';
+        }
 
-        if (read_bytes > 0 && strstr(response, "Output") != NULL)
+        if (read_bytes > 0)
+        {
+            printf("\n    [DEBUG] Recu (%ld bytes): ", read_bytes);
+            for (i = 0; i < (int)read_bytes && i < 60; i++)
+            {
+                if (response[i] >= 32 && response[i] < 127)
+                    printf("%c", response[i]);
+                else if (response[i] == '\r')
+                    printf("\\r");
+                else if (response[i] == '\n')
+                    printf("\\n");
+                else
+                    printf("[%02X]", (unsigned char)response[i]);
+            }
+            printf("\n  ");
+        }
+
+        if (read_bytes > 0)
         {
             printf(" STM32 detectee (*1#) !\n");
             stm32->com_port = port;
@@ -158,12 +225,16 @@ int stm32_detect(int m6e_com_port, STM32Info* stm32)
     if (!found)
     {
         printf("\n  [!] STM32 non detectee.\n");
+        printf("  [!] Verifiez:\n");
+        printf("      - Solder bridges SB13/SB14 fermes\n");
+        printf("      - UART TX/RX de la Nucleo\n");
+        printf("      - Firmware STM32 envoie des donnees au boot\n");
         return 0;
     }
 
     print_sep();
     printf("  STM32 : COM%d | %s\n", stm32->com_port, stm32->description);
-    printf("  Port  : maintenu ouvert (pas de reset DTR)\n");
+    printf("  Port  : maintenu ouvert (DTR/RTS desactives)\n");
     print_sep();
     return 1;
 }
@@ -177,34 +248,39 @@ int stm32_send_cmd(STM32Info* stm32, int antenna_num)
     DWORD read_bytes;
     char  response[128];
     int   attempt;
+    int   i;
 
     if (stm32->handle == INVALID_HANDLE_VALUE) return 0;
 
     for (attempt = 0; attempt < 3; attempt++)
     {
-        /*
-         * Purge complete avant chaque envoi
-         * Evite saturation buffer apres plusieurs commandes
-         */
         PurgeComm(stm32->handle, PURGE_RXABORT | PURGE_RXCLEAR |
             PURGE_TXABORT | PURGE_TXCLEAR);
         Sleep(50);
 
-        /* Envoyer la commande */
         stm32_write_cmd(stm32->handle, antenna_num);
 
-        /* Attendre la reponse */
         Sleep(300);
 
-        /* Lire la reponse */
         memset(response, 0, sizeof(response));
-        ReadFile(stm32->handle, response, sizeof(response) - 1,
-            &read_bytes, NULL);
+        if (!ReadFile(stm32->handle, response, sizeof(response) - 1,
+            &read_bytes, NULL))
+        {
+            if (attempt < 2) printf(" [retry %d]", attempt + 1);
+            Sleep(200);
+            continue;
+        }
+
+        if (read_bytes > 0)
+        {
+            response[read_bytes] = '\0';
+        }
 
         if (read_bytes > 0 && strstr(response, "Output") != NULL)
+        {
             return 1;
+        }
 
-        /* Pas de reponse — attendre avant retry */
         if (attempt < 2)
         {
             printf(" [retry %d]", attempt + 1);

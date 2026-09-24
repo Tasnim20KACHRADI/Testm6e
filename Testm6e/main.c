@@ -17,7 +17,8 @@
     * 1 = Mesure complete    (balayage freq x puissance 72 antennes)
     * 3 = Sweep freq x puissance sur une antenne choisie (type S21)
     */
-#define RUN_MODE  1
+#define RUN_MODE  1 
+
 
 
 int main(void)

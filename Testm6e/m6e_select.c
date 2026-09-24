@@ -84,7 +84,7 @@ int m6e_select_best_tag(TagProfile* tags,
 
     printf("  => EPC     : %s\n", tags[*best_idx].epc);
     printf("  => Ant%-3d  : %.1f dBm\n",
-        ANTENNA_1, tags[*best_idx].mean_a1);
+        ANTENNA_1 , tags[*best_idx].mean_a1);
     printf("  => Ant%-3d  : %.1f dBm\n",
         ANTENNA_31, tags[*best_idx].mean_a31);
     printf("  => Delta   : %.1f dBm\n", tags[*best_idx].delta);
