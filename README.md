@@ -23,15 +23,8 @@ Les programmes permettent principalement de :
 - Analyser les données et générer des courbes et des heatmaps pour visualiser les résultats.
 - Contrôler le moteur et réaliser une cartographie 3D des mesures dans la version avec moteur.
 
-## 3. État du développement
 
-### ⚠️ Work in Progress (WIP)
-
-Le projet est actuellement en cours de développement, de test et de validation sur l’arche de mesure. Certains modules peuvent encore évoluer en fonction des essais et des résultats obtenus.
-
-La version disponible ne doit donc pas être considérée comme une version finale et entièrement validée du système.
-
-## 4. Installation et configuration
+## 3. Installation et configuration
 
 Avant de compiler ou d’exécuter les programmes, il est nécessaire de vérifier et de configurer correctement l’environnement de développement, notamment :
 
@@ -43,7 +36,7 @@ Avant de compiler ou d’exécuter les programmes, il est nécessaire de vérifi
 
 Vérifiez soigneusement les branchements avant toute mise sous tension et assurez-vous que les composants sont correctement alimentés.
 
-## 5. Recommandations et dépannage
+## 4. Recommandations et dépannage
 
 - **Vérifier les branchements :** contrôler les connexions matérielles avant de lancer une mesure.
 - **Tester la communication :** vérifier que le lecteur M6e est correctement détecté avant d’exécuter une séquence complète.
@@ -51,7 +44,7 @@ Vérifiez soigneusement les branchements avant toute mise sous tension et assure
 - **Tester progressivement :** commencer par un test simple de connexion et de lecture avant de lancer l’ensemble des mesures.
 - **Préserver les versions :** effectuer les modifications et les `push` sur la branche correspondant à la version concernée, sans écraser involontairement l’autre version.
 
-## 6. Documentation
+## 5. Documentation
 
 Une copie du rapport de stage est disponible dans le dossier suivant, si celui-ci est présent sur la branche consultée :
 
