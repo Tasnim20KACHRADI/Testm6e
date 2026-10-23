@@ -1,15 +1,34 @@
-28/05
-# Avancement projet RFID M6e
+# Project Notes – M6e RFID Measurement System
 
-Hier et aujourd’hui, j’ai travaillé sur la configuration de l’environnement C/C++ pour utiliser la MercuryAPI avec le lecteur RFID ThingMagic M6e.
-J’ai finalement abandonné VS Code pour passer à Visual Studio 2022 afin de résoudre les problèmes de compilation et de linkage.
+## 1. Project Overview
 
-Actuellement, le programme C fonctionne et permet :
+This project focuses on automating RFID tag measurements using the ThingMagic M6e reader and the measurement arch. Please refer to the project report for a better understanding of the system architecture, measurement process, and hardware configuration.
 
-* la détection automatique des ports COM,
-* la détection automatique du baudrate,
-* la connexion automatique au lecteur M6e,
-* l’affichage des informations du lecteur (modèle, firmware, port, baudrate).
+A copy of the report is available at:
 
-Le programme fonctionne via terminal/console avec la MercuryAPI en C.
-La configuration automatique de la région RFID et la lecture des tags seront les prochaines étapes.
+`Testm6e/Testm6e/draft/rapport`
+
+## 2. Important Recommendations
+
+- **Read the report first:** Review the report to understand how the system works, the hardware setup, and the measurement procedure before making any changes.
+- **Check all hardware connections:** Carefully verify the wiring and connections between the M6e reader, the measurement arch, the antennas, the STM32 board (if used), and the computer. Incorrect connections may prevent the system from working properly.
+- **Set up the software environment:** Make sure the required development tools, drivers, libraries, and MercuryAPI dependencies are correctly installed and configured before compiling or running the code.
+- **M6e reader troubleshooting:** The M6e reader may occasionally stop responding or become unresponsive. In some cases, simply power-cycling the reader (turning it off and back on) resolves the issue. If the problem persists, check the connections, power supply, and communication settings.
+- **Test before running a complete measurement:** Start with a basic connection test to confirm that the reader is detected and communicating correctly before launching a full measurement sequence.
+- **Preserve the different project versions:** The repository contains different branches and/or versions of the project. Make sure you are working on the correct branch and understand whether it corresponds to the version with or without the motor before making changes. Commit and push your changes to the appropriate branch.
+
+## 3. Troubleshooting
+
+If the reader is not detected or measurements fail:
+
+1. Check the power supply and all hardware connections.
+2. Restart the M6e reader.
+3. Verify that the correct COM port and communication settings are being used.
+4. Check that the required drivers and MercuryAPI libraries are installed.
+5. Review the application logs and test the reader connection again.
+
+## 4. Contact
+
+If you have any questions about the project, the hardware setup, the software configuration, or the measurement procedure, feel free to contact me:
+
+**Email: tesnimkachradi4@gmail.com
